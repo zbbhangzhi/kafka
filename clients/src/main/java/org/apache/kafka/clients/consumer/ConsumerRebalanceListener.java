@@ -80,6 +80,7 @@ import org.apache.kafka.common.TopicPartition;
 public interface ConsumerRebalanceListener {
 
     /**
+     * 消费停止后，再均衡前，执行提交消费位移，避免重复消费
      * A callback method the user can implement to provide handling of offset commits to a customized store on the start
      * of a rebalance operation. This method will be called before a rebalance operation starts and after the consumer
      * stops fetching data. It is recommended that offsets should be committed in this callback to either Kafka or a
@@ -95,13 +96,14 @@ public interface ConsumerRebalanceListener {
      * invocation of {@link KafkaConsumer#poll(java.time.Duration)} in which this callback is being executed. This means it is not
      * necessary to catch these exceptions and re-attempt to wakeup or interrupt the consumer thread.
      *
-     * @param partitions The list of partitions that were assigned to the consumer on the last rebalance
+     * @param partitions The list of partitions that were assigned to the consumer on the last rebalance 再均衡前分配的
      * @throws org.apache.kafka.common.errors.WakeupException If raised from a nested call to {@link KafkaConsumer}
      * @throws org.apache.kafka.common.errors.InterruptException If raised from a nested call to {@link KafkaConsumer}
      */
     void onPartitionsRevoked(Collection<TopicPartition> partitions);
 
     /**
+     * 重新分配分区后，消费者消费前，执行对消费位移的处理
      * A callback method the user can implement to provide handling of customized offsets on completion of a successful
      * partition re-assignment. This method will be called after the partition re-assignment completes and before the
      * consumer starts fetching data, and only as the result of a {@link Consumer#poll(java.time.Duration) poll(long)} call.

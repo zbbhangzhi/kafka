@@ -81,6 +81,14 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 
 /**
+ * kafkaConsumer是非线程安全的，kafkaProducer是线程安全的；当生产者速度远大于消费者时，需要添加消费者以快速消费。
+ * 这个时候需要多线程消费：
+ * 方法一：线程封闭
+ * 一个消费线程消费多个分区，但这意味着一个线程维护一个TCP连接(实例化一个KafkaConsumer)
+ * 方法二：
+ * 多个线程消费一个分区assign/seek（对于位移提交和顺序控制的处理就会变得非常复杂）
+ * 方法三：
+ * 将消息模块改为多线程的实现方式：线程池方式处理已返回的一批批的消息
  * A client that consumes records from a Kafka cluster.
  * <p>
  * This client transparently handles the failure of Kafka brokers, and transparently adapts as topic partitions
@@ -867,6 +875,7 @@ public class KafkaConsumer<K, V> implements Consumer<K, V> {
     }
 
     /**
+     * 获取当前消费分配到的分区集合
      * Get the set of partitions currently assigned to this consumer. If subscription happened by directly assigning
      * partitions using {@link #assign(Collection)} then this will simply return the same partitions that
      * were assigned. If topic subscription was used, then this will give the set of topic partitions currently assigned
@@ -924,13 +933,14 @@ public class KafkaConsumer<K, V> implements Consumer<K, V> {
      * It is guaranteed, however, that the partitions revoked/assigned through this interface are from topics
      * subscribed in this call. See {@link ConsumerRebalanceListener} for more details.
      *
-     * @param topics The list of topics to subscribe to
+     * @param topics The list of topics to subscribe to 可订阅多主题
      * @param listener Non-null listener instance to get notifications on partition assignment/revocation for the
-     *                 subscribed topics
+     *                 subscribed topics 再均衡监听器，再均衡：分区的所属权从一个消费者转移到另一个消费者（消费不可用，消费者状态丢失（可能重复消费））
      * @throws IllegalArgumentException If topics is null or contains null or empty elements, or if listener is null
      * @throws IllegalStateException If {@code subscribe()} is called previously with pattern, or assign is called
      *                               previously (without a subsequent call to {@link #unsubscribe()}), or if not
      *                               configured at-least one partition assignment strategy
+     *      会自动均衡消费组与分区的关系 assign不具有   todo 哪
      */
     @Override
     public void subscribe(Collection<String> topics, ConsumerRebalanceListener listener) {
@@ -941,6 +951,7 @@ public class KafkaConsumer<K, V> implements Consumer<K, V> {
                 throw new IllegalArgumentException("Topic collection to subscribe to cannot be null");
             if (topics.isEmpty()) {
                 // treat subscribing to empty topic list as the same as unsubscribing
+                //没有主题相当于unsubscribe
                 this.unsubscribe();
             } else {
                 for (String topic : topics) {
@@ -1061,6 +1072,7 @@ public class KafkaConsumer<K, V> implements Consumer<K, V> {
     }
 
     /**
+     * 订阅主题分区
      * Manually assign a list of partitions to this consumer. This interface does not allow for incremental assignment
      * and will replace the previous assignment (if there is one).
      * <p>
@@ -1284,6 +1296,7 @@ public class KafkaConsumer<K, V> implements Consumer<K, V> {
     }
 
     /**
+     * 提交消费位移
      * Commit offsets returned on the last {@link #poll(Duration) poll()} for all the subscribed list of topics and
      * partitions.
      * <p>
@@ -1517,6 +1530,8 @@ public class KafkaConsumer<K, V> implements Consumer<K, V> {
     }
 
     /**
+     * 从特定位移开始拉取消息
+     * partition需要通过poll方法分配
      * Overrides the fetch offsets that the consumer will use on the next {@link #poll(Duration) poll(timeout)}. If this API
      * is invoked for the same partition more than once, the latest offset will be used on the next poll(). Note that
      * you may lose data if this API is arbitrarily used in the middle of consumption, to reset the fetch offsets
@@ -1779,6 +1794,7 @@ public class KafkaConsumer<K, V> implements Consumer<K, V> {
     }
 
     /**
+     * 查询指定主题的元数据信息
      * Get metadata about the partitions for a given topic. This method will issue a remote call to the server if it
      * does not already have any metadata about the given topic.
      *
@@ -1882,6 +1898,7 @@ public class KafkaConsumer<K, V> implements Consumer<K, V> {
     }
 
     /**
+     * 暂停某些分区的拉取操作：控制分区消费速度
      * Suspend fetching from the requested partitions. Future calls to {@link #poll(Duration)} will not return
      * any records from these partitions until they have been resumed using {@link #resume(Collection)}.
      * Note that this method does not affect partition subscription. In particular, it does not cause a group
@@ -1903,6 +1920,7 @@ public class KafkaConsumer<K, V> implements Consumer<K, V> {
     }
 
     /**
+     * 恢复某些分区向客户端返回数据的操作
      * Resume specified partitions which have been paused with {@link #pause(Collection)}. New calls to
      * {@link #poll(Duration)} will return records from these partitions if there are any to be fetched.
      * If the partitions were not previously paused, this method is a no-op.
@@ -1923,6 +1941,7 @@ public class KafkaConsumer<K, V> implements Consumer<K, V> {
     }
 
     /**
+     * 返回被暂停的分区集合
      * Get the set of partitions that were previously paused by a call to {@link #pause(Collection)}.
      *
      * @return The set of paused partitions
@@ -2265,6 +2284,8 @@ public class KafkaConsumer<K, V> implements Consumer<K, V> {
     }
 
     /**
+     * 检测当前是否只有一个线程在操作 （不是就抛错）
+     * KafkaConsumer是非线程安全的，每个方法执行前都需调用acquire，线程操作计数，轻量级锁，不会阻塞
      * Acquire the light lock protecting this consumer from multi-threaded access. Instead of blocking
      * when the lock is not available, however, we just throw an exception (since multi-threaded usage is not
      * supported).

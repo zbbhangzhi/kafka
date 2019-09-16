@@ -63,6 +63,7 @@ public interface ProducerInterceptor<K, V> extends Configurable {
      *
      * @param record the record from client or the record returned by the previous interceptor in the chain of interceptors.
      * @return producer record to send to topic/partition
+     * 消息序列化和分区前做定制操作
      */
     public ProducerRecord<K, V> onSend(ProducerRecord<K, V> record);
 

@@ -49,6 +49,7 @@ public class ConsumerConfig extends AbstractConfig {
 
     /**
      * <code>group.id</code>
+     * 消费者隶属消费组
      */
     public static final String GROUP_ID_CONFIG = CommonClientConfigs.GROUP_ID_CONFIG;
     private static final String GROUP_ID_DOC = CommonClientConfigs.GROUP_ID_DOC;
@@ -80,6 +81,7 @@ public class ConsumerConfig extends AbstractConfig {
 
     /**
      * <code>bootstrap.servers</code>
+     * broker地址
      */
     public static final String BOOTSTRAP_SERVERS_CONFIG = CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG;
 
@@ -106,6 +108,7 @@ public class ConsumerConfig extends AbstractConfig {
 
     /**
      * <code>auto.offset.reset</code>
+     * 当消费者找不到记录下的消费位移/位移越界时，默认使用这个：从分区末尾开始消费消息
      */
     public static final String AUTO_OFFSET_RESET_CONFIG = "auto.offset.reset";
     public static final String AUTO_OFFSET_RESET_DOC = "What to do when there is no initial offset in Kafka or if the current offset does not exist any more on the server (e.g. because that data has been deleted): <ul><li>earliest: automatically reset the offset to the earliest offset<li>latest: automatically reset the offset to the latest offset</li><li>none: throw exception to the consumer if no previous offset is found for the consumer's group</li><li>anything else: throw exception to the consumer.</li></ul>";
@@ -176,6 +179,7 @@ public class ConsumerConfig extends AbstractConfig {
 
     /**
      * <code>retry.backoff.ms</code>
+     * 重试间隔
      */
     public static final String RETRY_BACKOFF_MS_CONFIG = CommonClientConfigs.RETRY_BACKOFF_MS_CONFIG;
 

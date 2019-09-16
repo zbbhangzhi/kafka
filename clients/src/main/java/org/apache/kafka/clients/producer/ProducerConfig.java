@@ -91,6 +91,7 @@ public class ProducerConfig extends AbstractConfig {
                                            + " remains alive. This is the strongest available guarantee. This is equivalent to the acks=-1 setting.";
 
     /** <code>linger.ms</code> */
+    //发送ProducerBatch前等待多久时间发送 增加消息延迟 提高吞吐量
     public static final String LINGER_MS_CONFIG = "linger.ms";
     private static final String LINGER_MS_DOC = "The producer groups together any records that arrive in between request transmissions into a single batched request. "
                                                 + "Normally this occurs only under load when records arrive faster than they can be sent out. However in some circumstances the client may want to "
@@ -121,6 +122,7 @@ public class ProducerConfig extends AbstractConfig {
             + "and <code>" + LINGER_MS_CONFIG + "</code>.";
 
     /** <code>client.id</code> */
+    //KafkaProducer对应的客户端id
     public static final String CLIENT_ID_CONFIG = CommonClientConfigs.CLIENT_ID_CONFIG;
 
     /** <code>send.buffer.bytes</code> */
@@ -181,6 +183,7 @@ public class ProducerConfig extends AbstractConfig {
     public static final String METRIC_REPORTER_CLASSES_CONFIG = CommonClientConfigs.METRIC_REPORTER_CLASSES_CONFIG;
 
     /** <code>max.in.flight.requests.per.connection</code> */
+    //保证消息顺序性 建议为0
     public static final String MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION = "max.in.flight.requests.per.connection";
     private static final String MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION_DOC = "The maximum number of unacknowledged requests the client will send on a single connection before blocking."
                                                                             + " Note that if this setting is set to be greater than 1 and there are failed sends, there is a risk of"
@@ -199,6 +202,7 @@ public class ProducerConfig extends AbstractConfig {
             + " retry behavior.";
 
     /** <code>key.serializer</code> */
+    //指定key序列号器：全限定名
     public static final String KEY_SERIALIZER_CLASS_CONFIG = "key.serializer";
     public static final String KEY_SERIALIZER_CLASS_DOC = "Serializer class for key that implements the <code>org.apache.kafka.common.serialization.Serializer</code> interface.";
 
@@ -214,6 +218,7 @@ public class ProducerConfig extends AbstractConfig {
     private static final String PARTITIONER_CLASS_DOC = "Partitioner class that implements the <code>org.apache.kafka.clients.producer.Partitioner</code> interface.";
 
     /** <code>interceptor.classes</code> */
+    //拦截器列表 逗号隔开
     public static final String INTERCEPTOR_CLASSES_CONFIG = "interceptor.classes";
     public static final String INTERCEPTOR_CLASSES_DOC = "A list of classes to use as interceptors. "
                                                         + "Implementing the <code>org.apache.kafka.clients.producer.ProducerInterceptor</code> interface allows you to intercept (and possibly mutate) the records "

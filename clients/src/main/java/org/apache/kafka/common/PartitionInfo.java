@@ -22,7 +22,13 @@ package org.apache.kafka.common;
 public class PartitionInfo {
     private final String topic;
     private final int partition;
+    /**
+     * leader副本所在位置
+     */
     private final Node leader;
+    /**
+     * AR集合
+     */
     private final Node[] replicas;
     private final Node[] inSyncReplicas;
     private final Node[] offlineReplicas;

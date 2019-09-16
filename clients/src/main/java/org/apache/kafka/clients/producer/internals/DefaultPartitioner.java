@@ -50,9 +50,11 @@ public class DefaultPartitioner implements Partitioner {
      * @param cluster The current cluster metadata
      */
     public int partition(String topic, Object key, byte[] keyBytes, Object value, byte[] valueBytes, Cluster cluster) {
+        //如果key为null 那么会得到可用分区中的一个
         if (keyBytes == null) {
             return stickyPartitionCache.partition(topic, cluster);
-        } 
+        }
+        //key不为null时进行hash 得到所有分区中的一个
         List<PartitionInfo> partitions = cluster.partitionsForTopic(topic);
         int numPartitions = partitions.size();
         // hash the keyBytes to choose a partition

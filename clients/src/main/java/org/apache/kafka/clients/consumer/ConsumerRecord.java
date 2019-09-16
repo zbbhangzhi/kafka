@@ -36,6 +36,9 @@ public class ConsumerRecord<K, V> {
 
     private final String topic;
     private final int partition;
+    /**
+     * 在消息所属分区偏移量
+     */
     private final long offset;
     private final long timestamp;
     private final TimestampType timestampType;

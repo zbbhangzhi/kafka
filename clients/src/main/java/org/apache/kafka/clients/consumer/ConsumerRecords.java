@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * 消息集
  * A container that holds the list {@link ConsumerRecord} per partition for a
  * particular topic. There is one {@link ConsumerRecord} list for every topic
  * partition returned by a {@link Consumer#poll(java.time.Duration)} operation.
@@ -44,7 +45,7 @@ public class ConsumerRecords<K, V> implements Iterable<ConsumerRecord<K, V>> {
 
     /**
      * Get just the records for the given partition
-     * 
+     * 获取消息集中指定分区的消息
      * @param partition The partition to get records for
      */
     public List<ConsumerRecord<K, V>> records(TopicPartition partition) {
@@ -70,6 +71,7 @@ public class ConsumerRecords<K, V> implements Iterable<ConsumerRecord<K, V>> {
     }
 
     /**
+     * 获取消息集中所有分区
      * Get the partitions which have records contained in this record set.
      * @return the set of partitions with data in this record set (may be empty if no data was returned)
      */

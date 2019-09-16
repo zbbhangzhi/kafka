@@ -22,6 +22,7 @@ import org.apache.kafka.common.Cluster;
 import java.io.Closeable;
 
 /**
+ * 分区器
  * Partitioner Interface
  */
 
